@@ -8,7 +8,7 @@ on:
         required: false
         type: boolean
       
-      custom-pre-release-script:
+      pre-commit-hook:
         description: "Path to a custom pre-release script in the repository"
         required: false
         type: string
@@ -34,23 +34,24 @@ jobs:
           skip-commit: 'true'
           tag-prefix: ''
           pre-release: "${{ inputs.pre-release-mode }}"
+          pre-commit: "${{ inputs.pre-commit-hook }}"
 
       - name: Stop if needed
         if: ${{ steps.changelog.outputs.changelog == null }}
         run: exit 1
 
-      - name: Run Custom Pre-Release Script
-        if: inputs.custom-pre-release-script != ''
-        env:
-          NEW_TAG: ${{ steps.changelog.outputs.tag }}
-        run: |
-          if [ -f "${{ inputs.custom-pre-release-script }}" ]; then
-            chmod +x "${{ inputs.custom-pre-release-script }}"
-            "${{ inputs.custom-pre-release-script }}"
-          else
-            echo "Custom pre-release script not found"
-            exit 1
-          fi
+      #- name: Run Custom Pre-Release Script
+      #  if: inputs.custom-pre-release-script != ''
+      #  env:
+      #    NEW_TAG: ${{ steps.changelog.outputs.tag }}
+      #  run: |
+      #    if [ -f "${{ inputs.custom-pre-release-script }}" ]; then
+      #      chmod +x "${{ inputs.custom-pre-release-script }}"
+      #      "${{ inputs.custom-pre-release-script }}"
+      #    else
+      #      echo "Custom pre-release script not found"
+      #      exit 1
+      #    fi
 
       - name: Create Release
         uses: actions/create-release@v1
