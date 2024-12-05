@@ -7,9 +7,8 @@ on:
         description: "Whether or not to tag versions as pre-release versions"
         required: false
         type: boolean
-      
-      custom-pre-release-script:
-        description: "Path to a custom pre-release script in the repository"
+      before-release-script:
+        description: "Path to a custom script in the repository that runs before release"
         required: false
         type: string
 
@@ -34,20 +33,20 @@ jobs:
           skip-commit: 'true'
           tag-prefix: ''
           pre-release: "${{ inputs.pre-release-mode }}"
-          # pre-commit: "${{ inputs.pre-commit-hook }}"
 
       - name: Stop if needed
         if: ${{ steps.changelog.outputs.changelog == null }}
         run: exit 1
 
-      - name: Run Custom Pre-Release Script
-        if: inputs.custom-pre-release-script != ''
+      - name: Run custom script before Release
+        if: inputs.before-release-script != ''
         env:
           NEW_TAG: ${{ steps.changelog.outputs.tag }}
         run: |
-          if [ -f "${{ inputs.custom-pre-release-script }}" ]; then
-            chmod +x "${{ inputs.custom-pre-release-script }}"
-            "${{ inputs.custom-pre-release-script }}"
+          script="${{ inputs.before-release-script }}"
+          if [ -f "$script" ]; then
+            chmod +x "$script"
+            "$script"
           else
             echo "Custom pre-release script not found"
             exit 1
